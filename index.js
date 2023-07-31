@@ -4,9 +4,10 @@ const replace = require('replace-in-file');
 var cron = require('node-cron');
 require('dotenv').config();
 
+//consts
 const printerAddress = process.env.PRINTERADDRESS;
 const obsidianDailyPath = process.env.OBSIDIANDAILYPATH;
-const obsidianTemplatePath = process.env.OBSIDIANDAILYPATH;
+const obsidianTemplatePath = process.env.OBSIDIANTEMPLATEPATH;
 const currentDate = new Date().toISOString().split('T')[0]
 const todaysFile = obsidianDailyPath + '/' + currentDate + '_test.md'
 const events = [
@@ -17,7 +18,10 @@ const events = [
     { name: "Clean Shower", startDate: "2023-07-23", frequency: "30d" },
     { name: "Clean Toilet", startDate: "2023-07-23", frequency: "30d" },
     { name: "Vaccum Floor", startDate: "2023-07-23", frequency: "7d" },
+    { name: "Vaccum Floor", startDate: "2023-07-23", frequency: "7d" },
 ]
+
+//vars
 var todaysTask = [];
 var todaysTaskInMarkdown = "";
 var todaysQuote = null;
@@ -27,27 +31,34 @@ cron.schedule('30 6 * * *', () => {
     Main();
 });
 
+Main();
+
 // Main function
 function Main() {
     events.forEach(e => {
         const result = isOccurrence(e.startDate, e.frequency);
-        const nextOccurrences = getNextOccurrences(e.startDate, e.frequency, 10);
-        // console.log(nextOccurrences);
+        console.log(getNextOccurrences(e.startDate, e.frequency, 10));
         if (result) {
             todaysTask.push(e.name);
         }
     })
-    if (OBSIDIANDAILYPATH !== null && OBSIDIANTEMPLATEPATH !== null) {
+    if (obsidianDailyPath !== null && obsidianTemplatePath !== null) {
         createFile();
         replaceStringsInFile()
     }
-    todaysQuote = getRandomQuote();
-    todaysTaskInMarkdown = createMarkdownChecklist(todaysTask);
-    printTodaysnode(todaysQuote, todaysTaskInMarkdown);
+    // todaysQuote = getRandomQuote();
+    if (todaysTask.length === 0) {
+        todaysTaskInMarkdown = "No tasks today!"
+    }
+    else {
+        todaysTaskInMarkdown = createMarkdownChecklist(todaysTask);
+    }
+    console.log(todaysTaskInMarkdown);
+    // printTodaysNote(todaysQuote, todaysTaskInMarkdown);
 }
 
 // Print the physical note of today
-async function printTodaysnode(todaysQuote, todaysTaskInMarkdown) {
+async function printTodaysNote(todaysQuote, todaysTaskInMarkdown) {
     if (printerAddress === '') {
         console.log('no printer address set')
     } else {
@@ -71,12 +82,18 @@ async function printTodaysnode(todaysQuote, todaysTaskInMarkdown) {
         printer.print(currentDate)
         printer.newLine();
         printer.newLine("------");
-        printer.newLine();
-        printer.print(todaysQuote);
-        printer.newLine();
-        printer.newLine("------");
-        printer.newLine();
-        printer.println(todaysTaskInMarkdown);
+        if (todaysQuote !== null) {
+            printer.newLine();
+            printer.print(todaysQuote);
+            printer.newLine();
+            printer.newLine("------");
+        }
+        if (todaysTaskInMarkdown !== "") {
+            printer.newLine();
+            printer.println(todaysTaskInMarkdown);
+            printer.newLine();
+            printer.newLine("------");
+        }
         printer.cut();
 
         // console.log(printer.getText());
@@ -122,7 +139,7 @@ function replaceStringsInFile() {
             from: [/⚠️ This template is auto populated by #nodejs !\n/g, /¤¤DayOfWeek¤¤/g, /¤¤DailyToDo¤¤/g],
             to: ["", getDayOfWeek(), todaysTaskInMarkdown],
         });
-        console.log('Replacement results:', results);
+        // console.log('Replacement results:', results);
     }
 
     catch (error) {
