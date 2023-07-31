@@ -19,25 +19,74 @@ const events = [
     { name: "Vaccum Floor", startDate: "2023-07-23", frequency: "7d" },
 ]
 var todaysTask = [];
+var todaysTaskInMarkdown = "";
 var todaysQuote = null;
+
 // Main launch
-// cron.schedule('30 6 * * *', () => {
-//     createFile();
-//     replaceStringsInFile()
-// });
+cron.schedule('30 6 * * *', () => {
+    Main();
+});
 
-events.forEach(e => {
-    const result = isOccurrence(e.startDate, e.frequency);
-    const nextOccurrences = getNextOccurrences(e.startDate, e.frequency, 10);
-    // console.log(nextOccurrences);
-    if (result) {
-        todaysTask.push(e.name);
+// Main function
+function Main() {
+    events.forEach(e => {
+        const result = isOccurrence(e.startDate, e.frequency);
+        const nextOccurrences = getNextOccurrences(e.startDate, e.frequency, 10);
+        // console.log(nextOccurrences);
+        if (result) {
+            todaysTask.push(e.name);
+        }
+    })
+    createFile();
+    replaceStringsInFile()
+    todaysQuote = getRandomQuote();
+    todaysTaskInMarkdown = createMarkdownChecklist(todaysTask);
+    printTodaysnode(todaysQuote, todaysTaskInMarkdown);
+}
+
+// Print the physical note of today
+async function printTodaysnode(todaysQuote, todaysTaskInMarkdown) {
+    if (printerAddress === '') {
+        console.log('no printer address set')
+    } else {
+        const printer = new ThermalPrinter({
+            type: PrinterTypes.EPSON, // 'star' or 'epson'
+            interface: printerAddress,
+            options: {
+                timeout: 1000,
+            },
+            width: 48, // Number of characters in one line - default: 48
+            characterSet: CharacterSet.ISO8859_2_LATIN2, // Character set - default: SLOVENIA
+            breakLine: BreakLine.WORD, // Break line after WORD or CHARACTERS. Disabled with NONE - default: WORD
+            removeSpecialCharacters: false, // Removes special characters - default: false
+            lineCharacter: '-', // Use custom character for drawing lines - default: -
+        });
+
+        const isConnected = await printer.isPrinterConnected();
+        console.log('Printer connected:', isConnected);
+
+        printer.alignLeft();
+        printer.print(currentDate)
+        printer.newLine();
+        printer.newLine("------");
+        printer.newLine();
+        printer.print(todaysQuote);
+        printer.newLine();
+        printer.newLine("------");
+        printer.newLine();
+        printer.println(todaysTaskInMarkdown);
+        printer.cut();
+
+        // console.log(printer.getText());
+
+        try {
+            await printer.execute();
+            console.log('Print success.');
+        } catch (error) {
+            console.error('Print error:', error);
+        }
     }
-})
-
-createFile();
-replaceStringsInFile();
-todaysQuote = getRandomQuote();
+}
 
 // Create the file from the template
 function createFile() {
@@ -69,7 +118,7 @@ function replaceStringsInFile() {
         const results = replace.sync({
             files: todaysFile,
             from: [/⚠️ This template is auto populated by #nodejs !\n/g, /¤¤DayOfWeek¤¤/g, /¤¤DailyToDo¤¤/g],
-            to: ["", getDayOfWeek(), createMarkdownChecklist(todaysTask)],
+            to: ["", getDayOfWeek(), todaysTaskInMarkdown],
         });
         console.log('Replacement results:', results);
     }
@@ -120,10 +169,6 @@ function getNextOccurrences(startDate, occurrence, numOccurrences = 10) {
     return occurrences;
 }
 
-
-//generate a function that returns an inspirational quote from a free API
-
-
 // Get a random quote
 function getRandomQuote() {
     return fetch('https://api.quotable.io/quotes/random')
@@ -149,44 +194,4 @@ function getDayOfWeek() {
     const date = new Date();
     const dayIndex = date.getDay();
     return daysOfWeek[dayIndex];
-}
-
-
-async function example() {
-    if (printerAddress === '') {
-        console.log('no printer address set')
-    } else {
-        const printer = new ThermalPrinter({
-            type: PrinterTypes.EPSON, // 'star' or 'epson'
-            interface: printerAddress,
-            options: {
-                timeout: 1000,
-            },
-            width: 48, // Number of characters in one line - default: 48
-            characterSet: CharacterSet.ISO8859_2_LATIN2, // Character set - default: SLOVENIA
-            breakLine: BreakLine.WORD, // Break line after WORD or CHARACTERS. Disabled with NONE - default: WORD
-            removeSpecialCharacters: false, // Removes special characters - default: false
-            lineCharacter: '-', // Use custom character for drawing lines - default: -
-        });
-
-        const isConnected = await printer.isPrinterConnected();
-        console.log('Printer connected:', isConnected);
-
-        printer.alignLeft();
-        printer.newLine();
-        printer.println(quote.text);
-        printer.newLine();
-        printer.println(quote.author);
-        printer.cut();
-
-
-        // console.log(printer.getText());
-
-        try {
-            await printer.execute();
-            console.log('Print success.');
-        } catch (error) {
-            console.error('Print error:', error);
-        }
-    }
 }
