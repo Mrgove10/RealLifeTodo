@@ -37,8 +37,10 @@ function Main() {
             todaysTask.push(e.name);
         }
     })
-    createFile();
-    replaceStringsInFile()
+    if (OBSIDIANDAILYPATH !== null && OBSIDIANTEMPLATEPATH !== null) {
+        createFile();
+        replaceStringsInFile()
+    }
     todaysQuote = getRandomQuote();
     todaysTaskInMarkdown = createMarkdownChecklist(todaysTask);
     printTodaysnode(todaysQuote, todaysTaskInMarkdown);
