@@ -42,7 +42,7 @@ function Main() {
             todaysTask.push(e.name);
         }
     })
-    if (obsidianDailyPath !== null && obsidianTemplatePath !== null) {
+    if (obsidianDailyPath !== null && obsidianDailyPath !== "" && obsidianTemplatePath !== null && obsidianTemplatePath !== "") {
         createFile();
         replaceStringsInFile()
     }
