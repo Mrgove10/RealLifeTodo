@@ -48,20 +48,25 @@ function Main() {
     }
     // todaysQuote = getRandomQuote();
     if (todaysTask.length === 0) {
+        console.log("No tasks today!");
         todaysTaskInMarkdown = "No tasks today!"
     }
     else {
+        console.log("Tasks today: " + todaysTask);
         todaysTaskInMarkdown = createMarkdownChecklist(todaysTask);
+        printTodaysNote(todaysQuote, todaysTaskInMarkdown);
     }
-    console.log(todaysTaskInMarkdown);
-    // printTodaysNote(todaysQuote, todaysTaskInMarkdown);
+    // console.log(todaysTaskInMarkdown);
+
 }
 
 // Print the physical note of today
 async function printTodaysNote(todaysQuote, todaysTaskInMarkdown) {
-    if (printerAddress === '') {
-        console.log('no printer address set')
+    console.log("Printing note");
+    if (printerAddress === '' && printerAddress === null) {
+        console.log('no printer address set');
     } else {
+        console.log('Address set, printing');
         const printer = new ThermalPrinter({
             type: PrinterTypes.EPSON, // 'star' or 'epson'
             interface: printerAddress,
@@ -109,6 +114,7 @@ async function printTodaysNote(todaysQuote, todaysTaskInMarkdown) {
 
 // Create the file from the template
 function createFile() {
+    console.log("Creating file")
     fs.copyFile(obsidianTemplatePath, todaysFile, /*fs.constants.COPYFILE_EXCL,*/(err) => {
         if (err) throw err;
         console.log('FIle copied');
