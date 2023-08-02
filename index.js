@@ -11,6 +11,7 @@ const obsidianTemplatePath = process.env.OBSIDIANTEMPLATEPATH;
 const currentDate = new Date().toISOString().split('T')[0]
 const todaysFile = obsidianDailyPath + '/' + currentDate + '_test.md'
 const events = [
+    { name: "Dish Washer", startDate: "2023-07-30", frequency: "1d" },
     { name: "Sharky cleaning", startDate: "2023-07-30", frequency: "14d" },
     { name: "Bed sheet cleaning", startDate: "2023-08-06", frequency: "14d" },
     { name: "Take trash out", startDate: "2023-07-29", frequency: "5d" },
