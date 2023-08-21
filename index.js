@@ -1,5 +1,6 @@
 const { ThermalPrinter, PrinterTypes, CharacterSet, BreakLine } = require('node-thermal-printer')
 const fs = require('fs');
+const Quote = require('inspirational-quotes');
 const replace = require('replace-in-file');
 var cron = require('node-cron');
 require('dotenv').config();
@@ -36,9 +37,10 @@ Main();
 
 // Main function
 function Main() {
+    todaysQuote = Quote.getQuote();
     events.forEach(e => {
         const result = isOccurrence(e.startDate, e.frequency);
-        console.log(getNextOccurrences(e.startDate, e.frequency, 10));
+        // console.log(getNextOccurrences(e.startDate, e.frequency, 10));
         if (result) {
             todaysTask.push(e.name);
         }
@@ -47,7 +49,6 @@ function Main() {
         createFile();
         replaceStringsInFile()
     }
-    // todaysQuote = getRandomQuote();
     if (todaysTask.length === 0) {
         console.log("No tasks today!");
         todaysTaskInMarkdown = "No tasks today!"
@@ -85,12 +86,14 @@ async function printTodaysNote(todaysQuote, todaysTaskInMarkdown) {
         console.log('Printer connected:', isConnected);
 
         printer.alignLeft();
-        printer.print(currentDate)
+        printer.print(currentDate);
         printer.newLine();
         printer.print("------");
         if (todaysQuote !== null) {
             printer.newLine();
-            printer.print(todaysQuote);
+            printer.print(todaysQuote.text);
+            printer.newLine();
+            printer.print(todaysQuote.author);
             printer.newLine();
             printer.print("------");
         }
@@ -102,7 +105,7 @@ async function printTodaysNote(todaysQuote, todaysTaskInMarkdown) {
         }
         printer.cut();
 
-        // console.log(printer.getText());
+        console.log(printer.getText());
 
         try {
             await printer.execute();
@@ -135,6 +138,7 @@ function createMarkdownChecklist(items) {
     }
 
     const checklistItems = items.map(item => `- [ ] ${item}`).join('\n');
+    console.log(checklistItems)
     return checklistItems;
 }
 
@@ -193,25 +197,6 @@ function getNextOccurrences(startDate, occurrence, numOccurrences = 10) {
     }
 
     return occurrences;
-}
-
-// Get a random quote
-function getRandomQuote() {
-    return fetch('https://api.quotable.io/quotes/random')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(quote => {
-            console.log('Random Quote:', quote.content);
-            console.log('Author:', quote.author);
-            return quote;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
 }
 
 // Get the day of the week
