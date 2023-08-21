@@ -87,18 +87,18 @@ async function printTodaysNote(todaysQuote, todaysTaskInMarkdown) {
         printer.alignLeft();
         printer.print(currentDate)
         printer.newLine();
-        printer.newLine("------");
+        printer.print("------");
         if (todaysQuote !== null) {
             printer.newLine();
             printer.print(todaysQuote);
             printer.newLine();
-            printer.newLine("------");
+            printer.print("------");
         }
         if (todaysTaskInMarkdown !== "") {
             printer.newLine();
-            printer.println(todaysTaskInMarkdown);
+            printer.print(todaysTaskInMarkdown);
             printer.newLine();
-            printer.newLine("------");
+            printer.print("------");
         }
         printer.cut();
 
