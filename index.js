@@ -9,8 +9,6 @@ require('dotenv').config();
 const printerAddress = process.env.PRINTERADDRESS;
 const obsidianDailyPath = process.env.OBSIDIANDAILYPATH;
 const obsidianTemplatePath = process.env.OBSIDIANTEMPLATEPATH;
-const currentDate = new Date().toISOString().split('T')[0]
-const todaysFile = obsidianDailyPath + '/' + currentDate + '_test.md'
 const events = [
     { name: "Dish Washer", startDate: "2023-07-30", frequency: "1d" },
     { name: "Sharky cleaning", startDate: "2023-07-30", frequency: "14d" },
@@ -24,6 +22,8 @@ const events = [
 ]
 
 //vars
+var currentDate = new Date().toISOString().split('T')[0]
+var todaysFile = obsidianDailyPath + '/' + currentDate + '_test.md'
 var todaysTask = [];
 var todaysTaskInMarkdown = "";
 var todaysQuote = null;
@@ -37,6 +37,8 @@ Main();
 
 // Main function
 function Main() {
+    currentDate = new Date().toISOString().split('T')[0]
+    todaysFile = obsidianDailyPath + '/' + currentDate + '_test.md'
     todaysQuote = Quote.getQuote();
     events.forEach(e => {
         const result = isOccurrence(e.startDate, e.frequency);
