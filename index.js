@@ -37,6 +37,12 @@ Main();
 
 // Main function
 function Main() {
+    // Start by resetting all the variables
+    todaysTask = [];
+    todaysTaskInMarkdown = "";
+    todaysQuote = null;
+
+    // Apply new variables after reset
     currentDate = new Date().toISOString().split('T')[0]
     todaysFile = obsidianDailyPath + '/' + currentDate + '_test.md'
     todaysQuote = Quote.getQuote();
